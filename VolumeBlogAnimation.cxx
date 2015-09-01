@@ -36,11 +36,9 @@
 #include <vtkVolumeProperty.h>
 //#include <vtkWindowToImageFilter.h>
 //#include <vtkXMLImageDataReader.h>
-#include <vtkCameraRepresentation.h>
 #include <vtkCameraWidget.h>
 #include <vtkDICOMImageReader.h>
 #include <vtkCameraInterpolator.h>
-#include <vtkCameraWidget.h>
 
 #include <string>
 
@@ -98,36 +96,19 @@ int main(int argc, char * argv[])
   renderWindow->AddRenderer(ren.GetPointer());
   ren->ResetCamera();
 
-  // Setup the camera representation and interpolation
-  vtkNew<vtkCameraRepresentation> cameraRep;
-  cameraRep->SetNumberOfFrames(500);
+  // Setup the camera interpolation
   vtkNew<vtkCameraInterpolator> cameraInterp;
   cameraInterp->SetInterpolationTypeToSpline();
-  cameraRep->GetPositionCoordinate()->SetCoordinateSystemToNormalizedDisplay();
-  cameraRep->GetPositionCoordinate()->SetValue(0.08, 0.07);
-  cameraRep->GetPosition2Coordinate()->SetCoordinateSystemToNormalizedDisplay();
-  cameraRep->GetPosition2Coordinate()->SetValue(0.16, 0.14);
 
   // Setup render window interactor
   vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+  renderWindowInteractor->SetRenderWindow(renderWindow.GetPointer());
   vtkNew<vtkInteractorStyleTrackballCamera> style;
   renderWindowInteractor->SetInteractorStyle(style.GetPointer());
 
-  // Setup the camera widget
-  vtkNew<vtkCameraWidget> cameraWidget;
-  cameraWidget->SetInteractor(renderWindowInteractor.GetPointer());
-  cameraWidget->SetRepresentation(cameraRep.GetPointer());
-  cameraWidget->KeyPressActivationOff();
-
-  cameraRep->SetCamera(ren->GetActiveCamera());
-
   // Render and start interaction
-  renderWindowInteractor->SetRenderWindow(renderWindow.GetPointer());
   renderWindow->Render();
   renderWindowInteractor->Initialize();
-
-  // Enable the widget
-  cameraWidget->On();
 
   // Start the event loop
   renderWindowInteractor->Start();
