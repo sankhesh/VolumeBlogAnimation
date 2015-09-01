@@ -5,8 +5,15 @@ PROJECT(VolumeBlogAnimation)
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
+set(SRCS
+  VolumeBlogAnimation.cxx
+  pugixml/pugixml.cpp
+  pugixml/pugixml.hpp
+  pugixml/pugiconfig.hpp
+  )
+
 add_executable(VolumeBlogAnimation MACOSX_BUNDLE
-  VolumeBlogAnimation.cxx)
+  ${SRCS})
 
 if(VTK_LIBRARIES)
   target_link_libraries(VolumeBlogAnimation ${VTK_LIBRARIES})
