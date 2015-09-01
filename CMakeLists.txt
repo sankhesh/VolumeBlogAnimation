@@ -6,10 +6,12 @@ find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
 set(SRCS
-  VolumeBlogAnimation.cxx
+  pugixml/pugiconfig.hpp
   pugixml/pugixml.cpp
   pugixml/pugixml.hpp
-  pugixml/pugiconfig.hpp
+  VolumeBlogAnimation.cxx
+  vtkAnimationUtils.cxx
+  vtkAnimationUtils.h
   )
 
 add_executable(VolumeBlogAnimation MACOSX_BUNDLE
