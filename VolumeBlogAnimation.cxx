@@ -1,10 +1,10 @@
 // Code to produce the animation movie for the volume blog
 
 #include <vtkActor.h>
-//#include <vtkCallbackCommand.h>
+#include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkColorTransferFunction.h>
-//#include <vtkCommand.h>
+#include <vtkCommand.h>
 //#include <vtkCullerCollection.h>
 //#include <vtkCuller.h>
 //#include <vtkDataArray.h>
@@ -41,6 +41,84 @@
 #include <vtkCameraInterpolator.h>
 
 #include <string>
+
+struct CameraInterpolator
+{
+  vtkSmartPointer<vtkCamera> Camera;
+  vtkSmartPointer<vtkCameraInterpolator> Interpolator;
+  vtkSmartPointer<vtkRenderWindow> RenderWindow;
+  vtkSmartPointer<vtkVolumeProperty> VolumeProperty;
+
+  CameraInterpolator()
+    {
+    Camera = 0;
+    Interpolator = 0;
+    RenderWindow = 0;
+    VolumeProperty = 0;
+    }
+
+  void AddCamera()
+    {
+    if (!this->Interpolator || !this->Camera)
+      {
+      return;
+      }
+    double t = static_cast<double> (this->Interpolator->GetNumberOfCameras());
+    this->Interpolator->AddCamera(t, this->Camera);
+    }
+
+  void Animate()
+    {
+    if (!this->Interpolator || !this->RenderWindow || !this->Camera)
+      {
+      return;
+      }
+    int numSteps = 100;
+    double min = this->Interpolator->GetMinimumT();
+    double max = this->Interpolator->GetMaximumT();
+    int i = 0;
+    while (i <= numSteps)
+      {
+      this->VolumeProperty->ShadeOn();
+      if (i >= numSteps / 2.0)
+        {
+        this->VolumeProperty->ShadeOff();
+        }
+      double t = static_cast<double>(i) * (max - min) / numSteps;
+      this->Interpolator->InterpolateCamera(t, this->Camera);
+      this->RenderWindow->Render();
+      i++;
+      }
+    }
+};
+
+void KeypressCallbackFunction( vtkObject* caller,
+                               long unsigned int vtkNotUsed(eventId),
+                               void* clientData,
+                               void* vtkNotUsed(callData))
+{
+  vtkSmartPointer<vtkRenderWindowInteractor> iren =
+    vtkRenderWindowInteractor::SafeDownCast(caller);
+
+  CameraInterpolator* camInterp =
+    reinterpret_cast<CameraInterpolator*>(clientData);
+
+  if (!iren)
+    {
+    return;
+    }
+  std::string key = iren->GetKeySym();
+  if (key == "c")
+    {
+    // Add current camera parameters to animation 
+    camInterp->AddCamera();
+    }
+  else if (key == "a")
+    {
+    // Animate the current interpolator spline
+    camInterp->Animate();
+    }
+}
 
 int main(int argc, char * argv[])
 {
@@ -106,6 +184,18 @@ int main(int argc, char * argv[])
   vtkNew<vtkInteractorStyleTrackballCamera> style;
   renderWindowInteractor->SetInteractorStyle(style.GetPointer());
 
+  // Hook up custom events
+  CameraInterpolator* camInterp = new CameraInterpolator();
+  camInterp->RenderWindow = renderWindow.GetPointer();
+  camInterp->Interpolator = cameraInterp.GetPointer();
+  camInterp->Camera = ren->GetActiveCamera();
+  camInterp->VolumeProperty = volumeProperty.GetPointer();
+  vtkNew<vtkCallbackCommand> keypressCallback;
+  keypressCallback->SetCallback(KeypressCallbackFunction);
+  keypressCallback->SetClientData(camInterp);
+  renderWindowInteractor->AddObserver(vtkCommand::KeyPressEvent,
+                                      keypressCallback.GetPointer());  
+
   // Render and start interaction
   renderWindow->Render();
   renderWindowInteractor->Initialize();
@@ -113,5 +203,6 @@ int main(int argc, char * argv[])
   // Start the event loop
   renderWindowInteractor->Start();
 
+  delete camInterp;
   return EXIT_SUCCESS;
 }
