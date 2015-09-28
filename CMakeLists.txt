@@ -12,6 +12,8 @@ set(SRCS
   VolumeBlogAnimation.cxx
   vtkAnimationUtils.cxx
   vtkAnimationUtils.h
+  vtkVolumePropertyCollection.cxx
+  vtkVolumePropertyCollection.h
   )
 
 add_executable(VolumeBlogAnimation MACOSX_BUNDLE

@@ -5,12 +5,15 @@ Copyright and License information
 #ifndef __vtkAnimationUtils_h
 #define __vtkAnimationUtils_h
 
+#include "vtkVolumePropertyCollection.h"
+
 // VTK includes
 #include <vtkCamera.h>
 #include <vtkCameraInterpolator.h>
 #include <vtkObject.h>
 #include <vtkRenderWindow.h>
 #include <vtkVolumeProperty.h>
+#include <vtkNew.h>
 
 /// This class provides utility functions to animate the view
 class vtkAnimationUtils : public vtkObject
@@ -57,6 +60,8 @@ protected:
   vtkCameraInterpolator* Interpolator;
   vtkRenderWindow* RenderWindow;
   vtkVolumeProperty* VolumeProperty;
+
+  vtkNew<vtkVolumePropertyCollection> Properties;
 
 private:
   vtkAnimationUtils(const vtkAnimationUtils&); // Not implemented

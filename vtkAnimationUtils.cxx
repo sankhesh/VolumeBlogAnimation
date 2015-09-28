@@ -69,10 +69,13 @@ void vtkAnimationUtils::Animate()
   int i = 0;
   while (i <= numSteps)
     {
-    this->VolumeProperty->ShadeOn();
+    if (i < numSteps / 2.0)
+      {
+      this->VolumeProperty->DeepCopy(this->Properties->Lung.GetPointer());
+      }
     if (i >= numSteps / 2.0)
       {
-      this->VolumeProperty->ShadeOff();
+      this->VolumeProperty->DeepCopy(this->Properties->Bones.GetPointer());
       }
     double t = static_cast<double>(i) * (max - min) / numSteps;
     this->Interpolator->InterpolateCamera(t, this->Camera);
